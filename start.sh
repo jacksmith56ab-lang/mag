@@ -2,21 +2,61 @@
 set -eu
 
 APP_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+
 DB_PATH="${SHOP_DB_PATH:-$APP_DIR/ricerve-shop-bot/shop.db}"
 export SHOP_DB_PATH="$DB_PATH"
 
 mkdir -p "$(dirname "$DB_PATH")"
 
-# The bot and admin panel deliberately use the same SQLite file.
+NODE_VERSION="24.18.0"
+NODE_DIR="/tmp/ricerve-node"
+NODE_BIN="$NODE_DIR/bin/node"
+
+if [ ! -x "$NODE_BIN" ]; then
+    rm -rf "$NODE_DIR"
+    mkdir -p "$NODE_DIR"
+
+    python3 - "$NODE_VERSION" "$NODE_DIR" <<'PY'
+import sys
+import urllib.request
+import tarfile
+import io
+import os
+
+version = sys.argv[1]
+target = sys.argv[2]
+
+url = f"https://nodejs.org/dist/v{version}/node-v{version}-linux-x64.tar.gz"
+
+data = urllib.request.urlopen(url, timeout=120).read()
+
+with tarfile.open(fileobj=io.BytesIO(data), mode="r:gz") as tar:
+    prefix = f"node-v{version}-linux-x64/"
+
+    for member in tar.getmembers():
+        if not member.name.startswith(prefix):
+            continue
+
+        member.name = member.name[len(prefix):]
+
+        if member.name:
+            tar.extract(member, target)
+PY
+fi
+
+export PATH="$NODE_DIR/bin:$PATH"
+
 python3 "$APP_DIR/ricerve-shop-bot/bot.py" &
 BOT_PID=$!
 
 cleanup() {
-  kill "$BOT_PID" 2>/dev/null || true
-  wait "$BOT_PID" 2>/dev/null || true
+    kill "$BOT_PID" 2>/dev/null || true
+    wait "$BOT_PID" 2>/dev/null || true
 }
+
 trap cleanup INT TERM EXIT
 
-# Infrlo supplies PORT. The standalone server starts the internal API itself.
-export RICERVE_API_PORT="${RICERVE_API_PORT:-3001}"
-exec node "$APP_DIR/ricerve-admin-app/artifacts/ricerve-admin/standalone-server.mjs"
+export PORT="${PORT:-3000}"
+
+exec "$NODE_BIN" \
+    "$APP_DIR/ricerve-admin-app/artifacts/ricerve-admin/standalone-server.mjs"
