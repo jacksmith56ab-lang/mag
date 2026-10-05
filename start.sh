@@ -21,7 +21,6 @@ import sys
 import urllib.request
 import tarfile
 import io
-import os
 
 version = sys.argv[1]
 target = sys.argv[2]
@@ -45,6 +44,14 @@ PY
 fi
 
 export PATH="$NODE_DIR/bin:$PATH"
+
+API_DIST="$APP_DIR/ricerve-admin-app/artifacts/api-server/dist"
+API_INDEX="$API_DIST/index.mjs"
+
+# Fix paths embedded in the prebuilt API bundle.
+if [ -f "$API_INDEX" ]; then
+    sed -i "s#/home/runner/workspace/artifacts/api-server/dist#$API_DIST#g" "$API_INDEX"
+fi
 
 python3 "$APP_DIR/ricerve-shop-bot/bot.py" &
 BOT_PID=$!
