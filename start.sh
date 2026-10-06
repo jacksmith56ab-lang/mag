@@ -68,6 +68,3 @@ export HOST="${HOST:-0.0.0.0}"
 
 exec "$NODE_BIN" \
     "$APP_DIR/ricerve-admin-app/artifacts/ricerve-admin/standalone-server.mjs"
-
-exec "$NODE_BIN" \
-    "$APP_DIR/ricerve-admin-app/artifacts/ricerve-admin/standalone-server.mjs"
