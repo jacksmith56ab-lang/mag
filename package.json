@@ -1,0 +1,11 @@
+{
+  "name": "ricerve",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm --filter @workspace/ricerve-admin run build",
+    "start": "pnpm --filter @workspace/ricerve-admin run start"
+  },
+  "packageManager": "pnpm@10.4.1"
+}
