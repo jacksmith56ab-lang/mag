@@ -4,6 +4,7 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import {
+  setBaseUrl,
   useGetAdminAuth,
   useGetAdminDashboard,
   useGetAdminProducts,
@@ -41,6 +42,9 @@ import {
 } from 'lucide-react';
 import { Link, Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 import NotFound from '@/pages/not-found';
+
+// API backend for the Ricerve admin panel.
+setBaseUrl('https://yyjytu.infrlo.com');
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 15_000, retry: 1, refetchOnWindowFocus: false } },
